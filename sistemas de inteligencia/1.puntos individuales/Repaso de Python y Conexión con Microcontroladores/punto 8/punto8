@@ -1,0 +1,39 @@
+import serial
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+import time
+
+# Configura la conexión serial
+ser = serial.Serial('COM2', 9600)  # Cambia 'COM8' según puerto serial
+time.sleep(1)  # Espera un segundo para establecer la conexión
+
+# Prepara los datos para graficar
+x_data = []
+y_data = []
+
+# Crea la figura y el eje
+fig, ax = plt.subplots()
+
+# Función para actualizar la gráfica
+def update(frame):
+    # Lee el valor del sensor desde Arduino
+    if ser.in_waiting > 0:
+        valor = int(ser.readline().decode('utf-8').strip())
+        y_data.append(valor)
+        x_data.append(len(x_data))
+        
+        # Limpia los datos antiguos si la lista es demasiado larga
+        if len(x_data) > 100:
+            x_data.pop(0)
+            y_data.pop(0)
+            
+        # Actualiza la gráfica
+        ax.clear()
+        ax.plot(x_data, y_data)
+        ax.set_ylim(0, 1024)  # Ajusta el rango del eje Y según tus necesidades
+
+# Anima la gráfica
+ani = animation.FuncAnimation(fig, update, interval=50)
+
+plt.show()
